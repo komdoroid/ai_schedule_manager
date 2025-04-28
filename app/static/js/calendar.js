@@ -9,10 +9,53 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         events: '/api/schedules', // スケジュールデータのAPIエンドポイント
         dateClick: function(info) {
-            // モーダルに日付をセットして表示
-            const modal = new bootstrap.Modal(document.getElementById('eventModal'));
-            document.getElementById('eventDate').value = info.dateStr;
-            modal.show()
+            document.getElementById('dailyTimetable').style.display = 'block';
+            document.getElementById('timetableDate').textContent = info.dateStr;
+            
+            // 時間帯を生成 (8:00 ~ 22:00)
+            const timeSlots = document.getElementById('timeSlots');
+            timeSlots.innerHTML = '';
+            
+            for (let hour = 8; hour <= 22; hour++) {
+                const time = `${hour.toString().padStart(2, '0')}:00`;
+                
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.dataset.time = time;
+                slot.innerHTML = `
+                <strong>${time}</strong>
+                <span class="float-end text-muted">+ 予定追加</span>
+                `;
+                
+                slot.addEventListener('click', () => {
+                // 選択された時間帯をアクティブ表示
+                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('active'));
+                slot.classList.add('active');
+                
+                // 予定追加モーダルを表示
+                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                document.getElementById('eventDate').value = info.dateStr;
+                document.getElementById('eventTime').value = time;
+                modal.show();
+                });
+                
+                timeSlots.appendChild(slot);
+            }
+            // 3. 選択した日付の既存予定を取得して表示
+            fetch(`/api/daily-events?date=${info.dateStr}`)
+                .then(res => res.json())
+                .then(events => {
+                    events.forEach(event => {
+                        const slot = document.querySelector(`.time-slot[data-time="${event.time}"]`);
+                        if (slot) {
+                            // 既存予定をバッジで表示
+                            const eventBadge = document.createElement('div');
+                            eventBadge.className = 'event-badge bg-primary text-white p-1 mt-1 rounded';
+                            eventBadge.textContent = event.title;
+                            slot.appendChild(eventBadge);
+                        }
+                    });
+                });
         }
     });
     calendar.render();

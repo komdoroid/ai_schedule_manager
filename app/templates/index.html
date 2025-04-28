@@ -23,7 +23,29 @@
     </style>
 </head>
 <body>
-    <div id="calendar"></div>
+    <!-- 既存のカレンダーdivをラップ -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 左側: カレンダー -->
+            <div class="col-md-8">
+            <div id="calendar"></div>
+            </div>
+            
+            <!-- 右側: タイムテーブル (初期状態は非表示) -->
+            <div class="col-md-4" id="dailyTimetable" style="display:none;">
+            <div class="card">
+                <div class="card-header">
+                <h5 id="timetableDate">2024-03-20</h5>
+                </div>
+                <div class="card-body p-0">
+                <div id="timeSlots" style="max-height: 70vh; overflow-y: auto;">
+                    <!-- 時間帯がここに動的に挿入されます -->
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
     <!-- カレンダーJS -->
     <script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
     <!-- モーダルダイアログ -->

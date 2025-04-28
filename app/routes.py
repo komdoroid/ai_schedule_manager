@@ -85,3 +85,13 @@ def ai_parse_schedule():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+@main_routes.route("/api/daily-events")
+def get_daily_events():
+    date = request.args.get('date')
+    schedules = Schedule.query.filter_by(date=date).all()
+    return jsonify([{
+        'id': s.id,
+        'title': s.title,
+        'time': s.time
+    } for s in schedules])

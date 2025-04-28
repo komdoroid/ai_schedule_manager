@@ -1,0 +1,13 @@
+/* 時間帯スロットのスタイル */
+.time-slot {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.time-slot:hover {
+  background: #f8f9fa;
+}
+.time-slot.active {
+  background: #e3f2fd;
+}
