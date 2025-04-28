@@ -1,10 +1,21 @@
 from flask import Blueprint, render_template, jsonify, request
 from app import db
 from app.models import Schedule
-import json
+from datetime import datetime
+import json, openai, os
+from dotenv import load_dotenv
 
-# Blueprintの作成（'mani'という名前でルートをグループ佳）
+load_dotenv()   # .envを読み込み
+
+# Blueprintの作成（'main'という名前でルートをグループ佳）
 main_routes = Blueprint('main', __name__)
+
+# テストモード用の固定レスポンス
+MOCH_RESPONSE = {
+    "title": "AIが生成した予定",
+    "date": "2025-04-25",
+    "time": "15:00"
+}
 
 @main_routes.route("/")
 def home():
@@ -34,3 +45,43 @@ def add_schedule():
     db.session.add(new_schedule)
     db.session.commit()
     return jsonify({"status":"success"})
+
+@main_routes.route("/ai-parse", methods=["POST"])
+def ai_parse_schedule():
+    # テストモード時はモックデータを返す
+    if os.getenv("TEST_MODE") == "1":
+        return jsonify(MOCH_RESPONSE)
+
+    try:
+        data = request.get_json()
+        user_input = data["text"]
+
+        # OpenAI APIで自然言語解析
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{
+                "role": "system",
+                "content": """
+                ユーザーの入力から予定を抽出し、JSON形式で返してください。
+                フォーマット: {"title": "予定名", "date": "YYYY-MM-DD", "time": "HH:MM"}
+                """
+            }, {
+                "role": "user",
+                "content": user_input
+            }],
+            temperature=0.3
+        )
+
+        # AIの出力をJSONとして解析
+        content = response.choices[0].message.content
+        parsed = json.loads(content)
+
+        # 日付フォーマットの検証
+        datetime.strptime(parsed["date"], "%Y-%m-%d")
+        if "time" in parsed:
+            datetime.strptime(parsed["time"], "%H:%M")
+
+        return jsonify(parsed)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400

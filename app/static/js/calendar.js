@@ -38,4 +38,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
     })
+
+    // AI予定登録フォームの処理
+    document.getElementById('aiEventForm').addEventListener('submit', async function(e){
+        e.preventDefault();
+        const userInput = document.getElementById('aiInput').value;
+
+        // OpenAI APIで自然言語を解析
+        const response = await fetch("/ai-parse", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({text: userInput})
+        });
+
+        const result = await response.json();
+
+        if(result.error){
+            alert("エラー: " + result.error)
+        }
+
+        // 解析結果を確認
+        if (confirm(`以下の予定を登録しますか？\n\nタイトル: ${result.title}\n日時: ${result.date} ${result.time || ''}`)) {
+            // 通常の予定登録APIを呼び出し
+            fetch("/add", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    title: result.title,
+                    date: result.date,
+                    time: result.time
+                })
+            }).then(() => {
+                alert("登録完了!");
+                location.reload();
+            })
+        }
+    })
 });
