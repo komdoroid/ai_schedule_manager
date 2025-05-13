@@ -1,66 +1,81 @@
 document.addEventListener('DOMContentLoaded', function() {
     const calendarEl = document.getElementById('calendar');
     const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth', // 月表示
+        initialView: 'dayGridMonth',
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
             right: 'dayGridMonth,timeGridWeek'
         },
-        events: '/api/schedules', // スケジュールデータのAPIエンドポイント
+        events: '/api/schedules',
+        contentHeight: 'auto', // カレンダー高さを調整
         dateClick: function(info) {
-            document.getElementById('dailyTimetable').style.display = 'block';
+            // 1. タイムテーブルを表示
+            const timetable = document.getElementById('dailyTimetable');
+            timetable.style.display = 'block';
             document.getElementById('timetableDate').textContent = info.dateStr;
-            
-            // 時間帯を生成 (8:00 ~ 22:00)
+
+            // 2. 時間スロットを生成 (6:00 ~ 22:00)
             const timeSlots = document.getElementById('timeSlots');
             timeSlots.innerHTML = '';
-            
-            for (let hour = 8; hour <= 22; hour++) {
-                const time = `${hour.toString().padStart(2, '0')}:00`;
-                
-                const slot = document.createElement('div');
-                slot.className = 'time-slot';
-                slot.dataset.time = time;
-                slot.innerHTML = `
-                <strong>${time}</strong>
-                <span class="float-end text-muted">+ 予定追加</span>
-                `;
-                
-                slot.addEventListener('click', () => {
-                // 選択された時間帯をアクティブ表示
-                document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('active'));
-                slot.classList.add('active');
-                
-                // 予定追加モーダルを表示
-                const modal = new bootstrap.Modal(document.getElementById('eventModal'));
-                document.getElementById('eventDate').value = info.dateStr;
-                document.getElementById('eventTime').value = time;
-                modal.show();
-                });
-                
-                timeSlots.appendChild(slot);
-            }
-            // 3. 選択した日付の既存予定を取得して表示
+
+            // 3. 既存予定を事前取得
             fetch(`/api/daily-events?date=${info.dateStr}`)
                 .then(res => res.json())
                 .then(events => {
+                    const eventMap = {};
                     events.forEach(event => {
-                        const slot = document.querySelector(`.time-slot[data-time="${event.time}"]`);
-                        if (slot) {
-                            // 既存予定をバッジで表示
-                            const eventBadge = document.createElement('div');
-                            eventBadge.className = 'event-badge bg-primary text-white p-1 mt-1 rounded';
-                            eventBadge.textContent = event.title;
-                            slot.appendChild(eventBadge);
-                        }
+                        eventMap[event.time] = event.title;
                     });
+
+                    // 4. 時間帯をループ生成
+                    for (let hour = 6; hour <= 22; hour++) {
+                        const time = `${hour.toString().padStart(2, '0')}:00`;
+                        
+                        const slot = document.createElement('div');
+                        slot.className = 'time-slot';
+                        slot.dataset.time = time;
+                        slot.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong>${time}</strong>
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-plus-circle"></i> 追加
+                                </span>
+                            </div>
+                        `;
+
+                        // 5. 既存予定がある場合の表示
+                        if (eventMap[time]) {
+                            slot.innerHTML += `
+                                <div class="event-badge mt-2">
+                                    <i class="bi bi-calendar-event"></i> ${eventMap[time]}
+                                </div>
+                            `;
+                        }
+
+                        // 6. クリックイベント
+                        slot.addEventListener('click', () => {
+                            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('active'));
+                            slot.classList.add('active');
+                            
+                            const modal = new bootstrap.Modal(document.getElementById('eventModal'));
+                            document.getElementById('eventDate').value = info.dateStr;
+                            document.getElementById('eventTime').value = time;
+                            modal.show();
+                        });
+
+                        timeSlots.appendChild(slot);
+                    }
                 });
+        },
+        eventDidMount: function(arg) {
+            // 予定要素にクラス追加
+            arg.el.classList.add('interactive-event');
         }
     });
     calendar.render();
 
-    // 保存ボタンのイベント
+    // 予定保存処理（既存のまま）
     document.getElementById('saveEvent').addEventListener('click', function() {
         const title = document.getElementById('eventTitle').value;
         const date = document.getElementById('eventDate').value;
@@ -68,53 +83,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch("/add", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                title: title,
-                date: date,
-                time: time || null
-            })
-        })
-        .then(response => {
-            if (response.ok){
-                location.reload(); // ページをリロードしてカレンダー更新
-            }
-        })
-    })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, date, time })
+        }).then(() => location.reload());
+    });
 
-    // AI予定登録フォームの処理
-    document.getElementById('aiEventForm').addEventListener('submit', async function(e){
-        e.preventDefault();
-        const userInput = document.getElementById('aiInput').value;
-
-        // OpenAI APIで自然言語を解析
-        const response = await fetch("/ai-parse", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({text: userInput})
-        });
-
-        const result = await response.json();
-
-        if(result.error){
-            alert("エラー: " + result.error)
-        }
-
-        // 解析結果を確認
-        if (confirm(`以下の予定を登録しますか？\n\nタイトル: ${result.title}\n日時: ${result.date} ${result.time || ''}`)) {
-            // 通常の予定登録APIを呼び出し
-            fetch("/add", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({
-                    title: result.title,
-                    date: result.date,
-                    time: result.time
-                })
-            }).then(() => {
-                alert("登録完了!");
-                location.reload();
-            })
-        }
-    })
+    document.getElementById('closeTimetable').addEventListener('click', function() {
+        document.getElementById('dailyTimetable').style.display = 'none';
+    });
 });

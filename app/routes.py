@@ -89,9 +89,8 @@ def ai_parse_schedule():
 @main_routes.route("/api/daily-events")
 def get_daily_events():
     date = request.args.get('date')
-    schedules = Schedule.query.filter_by(date=date).all()
+    schedules = Schedule.query.filter_by(date=date).order_by(Schedule.time).all()
     return jsonify([{
-        'id': s.id,
         'title': s.title,
-        'time': s.time
+        'time': s.time if s.time else "00:00"  # NULL対策
     } for s in schedules])

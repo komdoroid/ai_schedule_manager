@@ -1,13 +1,100 @@
 /* 時間帯スロットのスタイル */
-.time-slot {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.time-slot:hover {
-  background: #f8f9fa;
-}
 .time-slot.active {
   background: #e3f2fd;
+}
+
+/* タイムテーブルのスタイリング */
+.timetable-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
+  background: #e0e0e0; /* グリッド線の色 */
+}
+
+.time-slot {
+  padding: 12px 15px;
+  background: white;
+  border-left: 4px solid #4285f4; /* 左端にアクセントカラー */
+  position: relative;
+}
+
+.time-slot::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e0e0e0, transparent);
+}
+
+.time-slot:hover {
+  background: #f8f9fa;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.event-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #4285f4;
+  color: white;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  margin-top: 5px;
+}
+
+/* カレンダーコンテナのサイズ調整 */
+#calendar {
+  width: 100%;
+  height: 80vh; /* 画面の高さの80%を利用 */
+  margin: 20px auto;
+  padding: 15px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+
+/* カードレイアウトの調整 */
+.card {
+  border: none;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* カレンダー上の予定アイテム */
+.fc-event {
+  transition: all 0.2s ease !important; /* アニメーション追加 */
+}
+
+/* ホバー時の効果 */
+.fc-event:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  z-index: 1000 !important; /* 他の要素より前面に */
+}
+
+/* 時間表示のスタイリング */
+.fc-event-time {
+  font-weight: bold !important;
+}
+
+/* カレンダー全体のホバー効果 */
+.fc-daygrid-day:hover {
+  background-color: #f8f9fa !important;
+}
+
+/* イベントタイトルの装飾 */
+.fc-event-title {
+  padding-left: 5px !important;
+}
+
+/* 閉じるボタンのスタイル */
+#closeTimetable {
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#closeTimetable:hover {
+    transform: scale(1.1);
+    opacity: 0.8;
 }
