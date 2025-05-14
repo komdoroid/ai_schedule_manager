@@ -52,6 +52,7 @@
   padding: 15px;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   border-radius: 8px;
+  transition: height 0.3s ease;
 }
 
 /* カードレイアウトの調整 */
@@ -97,4 +98,26 @@
 #closeTimetable:hover {
     transform: scale(1.1);
     opacity: 0.8;
+}
+
+/* 週表示時のレイアウト調整 */
+.fc-timeGridWeek-view #ai-form-normal {
+  display: flex ;
+  flex-direction: column;
+  height: calc(70vh - 60px); /*カレンダーの高さからAIフォームの高さを引く */
+}
+
+.fc-timeGridWeek-view #ai-form-week {
+  flex: 1;
+  height: auto !important; /* 高さを自動調整 */
+  margin-bottom: 20px;
+}
+
+#ai-form-normal {
+  margin-top: 30px
+}
+
+/* カレンダーの高さ調整 */
+.fc-dayGridMonth-view #calendar {
+  height: 80vh;
 }

@@ -22,8 +22,28 @@
     <div class="container-fluid">
         <div class="row">
             <!-- 左側: カレンダー -->
-            <div class="col-md-8">
+            <div class="col-md-8" id="main-content">
                 <div id="calendar"></div>
+                <!-- 週表示時に表示するAIフォーム -->
+                <div id="ai-form-week" class="mt-3 d-none">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="bi bi-robot"></i> AI予定登録
+                        </div>
+                        <div class="card-body">
+                            <form id="aiEventForm">
+                                <div class="mb-3">
+                                <label class="form-label">自然言語で予定を入力</label>
+                                <input type="text" class="form-control" id="aiInput" 
+                                        placeholder="例: 来週月曜の15時に打ち合わせ">
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-magic"></i> 解析して登録
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- 右側: タイムテーブル (初期状態は非表示) -->
@@ -38,6 +58,27 @@
                             <!-- 時間帯がここに動的に挿入されます -->
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI自動予定登録フォーム -->
+        <div id="ai-form-normal" class="container mt-4">
+            <div class="card">
+                <div class="card-header">
+                <i class="bi bi-robot"></i> AI予定登録
+                </div>
+                <div class="card-body">
+                <form id="aiEventForm">
+                    <div class="mb-3">
+                    <label class="form-label">自然言語で予定を入力</label>
+                    <input type="text" class="form-control" id="aiInput" 
+                            placeholder="例: 来週月曜の15時に打ち合わせ">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-magic"></i> 解析して登録
+                    </button>
+                </form>
                 </div>
             </div>
         </div>
@@ -72,26 +113,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">閉じる</button>
                 <button type="button" class="btn btn-primary" id="saveEvent">保存</button>
             </div>
-            </div>
-        </div>
-    </div>
-    <!-- AI自動予定登録フォーム -->
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-            <i class="bi bi-robot"></i> AI予定登録
-            </div>
-            <div class="card-body">
-            <form id="aiEventForm">
-                <div class="mb-3">
-                <label class="form-label">自然言語で予定を入力</label>
-                <input type="text" class="form-control" id="aiInput" 
-                        placeholder="例: 来週月曜の15時に打ち合わせ">
-                </div>
-                <button type="submit" class="btn btn-primary">
-                <i class="bi bi-magic"></i> 解析して登録
-                </button>
-            </form>
             </div>
         </div>
     </div>

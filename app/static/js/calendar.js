@@ -71,6 +71,23 @@ document.addEventListener('DOMContentLoaded', function() {
         eventDidMount: function(arg) {
             // 予定要素にクラス追加
             arg.el.classList.add('interactive-event');
+        },
+
+        viewDidMount: function(view) {
+            // 表示モードに応じてAIフォームを切り替え
+            const isWeekView = view.type === 'timeGridWeek';
+            document.getElementById('ai-form-week').classList.toggle('d-none', !isWeekView);
+            document.getElementById('ai-form-normal').classList.toggle('d-none', isWeekView);
+
+            // カレンダー高さを調整
+            calendar.setOption('height', isWeekView ? '70vh' : '80vh');
+            
+            // 週表示時にメインコンテンツの高さを調整
+            if (isWeekView) {
+                document.getElementById('main-content').style.minHeight = '70vh';
+            } else {
+                document.getElementById('main-content').style.minHeight = '';
+            }
         }
     });
     calendar.render();
